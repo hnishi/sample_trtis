@@ -30,7 +30,7 @@ docker exec -it $CUSTOM_BACKEND_CONTAINER_NAME sh -c \
 docker exec -it $CUSTOM_BACKEND_CONTAINER_NAME sh -c \
     "echo 'add_subdirectory(../../custom_backend/sample_sequence src/custom/sample_sequence)' >> /workspace/build/trtis-custom-backends/CMakeLists.txt"
 docker exec -it $CUSTOM_BACKEND_CONTAINER_NAME sh -c \
-    "echo 'add_subdirectory(../../custom_backend/sample_sequence src/custom/mecab_model)' >> /workspace/build/trtis-custom-backends/CMakeLists.txt"
+    "echo 'add_subdirectory(../../custom_backend/mecab_model src/custom/mecab_model)' >> /workspace/build/trtis-custom-backends/CMakeLists.txt"
 ## build custom backend files
 docker exec -it $CUSTOM_BACKEND_CONTAINER_NAME sh -c "cd /workspace && bash build_custom_backend.sh"
 

@@ -43,6 +43,11 @@ Context::~Context() {}
 int
 Context::Init()
 {
+  std::shared_ptr<MeCab::Model> model(MeCab::createModel("-Owakati"));
+  if(!model) {
+      std::cerr << "Error!" << std::endl;
+      return -1;
+  }
   return ErrorCodes::Success;
 }
 

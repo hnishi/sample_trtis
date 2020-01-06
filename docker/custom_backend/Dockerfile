@@ -16,9 +16,9 @@ RUN set -x && \
     apt-get install -y wget
 
 # copy build script
-ADD ./build_custom_backend.sh /workspace/
+ADD ./custom_backend/build_custom_backend.sh /workspace/
 
 # copy mecab install script and build mecab
-ADD ../install_script/install_mecab.sh /workspace/
+ADD ./install_script/install_mecab.sh /workspace/
 RUN set -x && \
     bash ./install_mecab.sh

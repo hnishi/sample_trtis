@@ -20,7 +20,7 @@ RUN set -x && \
     apt-get install -y libopencv-dev libopencv-core-dev
 
 # copy mecab install script and build mecab
-ADD ../install_script/install_mecab.sh /workspace/
+ADD ./install_script/install_mecab.sh /workspace/
 RUN set -x && \
     bash ./install_mecab.sh
 
