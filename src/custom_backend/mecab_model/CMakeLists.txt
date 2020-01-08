@@ -7,6 +7,8 @@ cmake_minimum_required (VERSION 3.5)
 #
 configure_file(libmecab_model.ldscript libmecab_model.ldscript COPYONLY)
 
+set(CMAKE_CXX_FLAGS, "${CMAKE_CXX_FLAGS} `mecab-config --cflags`")
+
 add_library(
   mecab_model SHARED
   mecab_model.cc
@@ -22,6 +24,10 @@ set_target_properties(
 target_link_libraries(
   mecab_model
   PRIVATE custombackend
+)
+target_link_libraries(
+  mecab_model
+  PRIVATE "-L/usr/local/lib -lmecab -lstdc++"
 )
 
 install(
