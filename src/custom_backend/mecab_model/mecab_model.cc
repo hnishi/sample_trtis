@@ -29,8 +29,11 @@ class Context : public CustomInstance {
       CustomGetNextInputFn_t input_fn, CustomGetOutputFn_t output_fn);
 
  private:
-  int
-      GetControlInput(
+  std::vector<std::string> ParseText(std::string text);
+  
+  std::vector<std::string> Split(std::string str, char del);
+  
+  int GetControlInput(
       CustomGetNextInputFn_t input_fn, void* input_context, 
       int32_t& start, int32_t& end, int32_t& ready, uint64_t& corrid);
 
@@ -38,8 +41,8 @@ class Context : public CustomInstance {
       CustomGetNextInputFn_t input_fn, void* input_context, const char* name,
       const size_t expected_byte_size, std::vector<uint8_t>* input);
   
-  int SaveInputText(
-      CustomGetNextInputFn_t input_fn, void* input_context, const char* name, uint64_t corrid);
+  int GetInputText(
+      CustomGetNextInputFn_t input_fn, void* input_context, const char* name, uint64_t corrid, std::string& input_text);
   
   int OutputText(
       CustomGetOutputFn_t output_fn, CustomPayload* payloads, std::string output_text);
@@ -118,7 +121,99 @@ Context::Execute(
     const uint32_t payload_cnt, CustomPayload* payloads,
     CustomGetNextInputFn_t input_fn, CustomGetOutputFn_t output_fn)
 {
-    return ErrorCodes::Success;
+  std::cout << "[MecabModel] start to execute.." << std::endl;
+  int err;
+  for (uint32_t pidx = 0; pidx < payload_cnt; ++pidx) {
+    CustomPayload& payload = payloads[pidx];
+    if (payload.batch_size != 1) {
+      payload.error_code = kTimesteps;
+      continue;
+    }
+
+    // get control input
+    int32_t start, end, ready;
+    uint64_t corrid;
+    err = GetControlInput(
+      input_fn, payload.input_context, start, end, ready, corrid
+    );
+    if (err != ErrorCodes::Success) {
+      payload.error_code = err;
+      continue;
+    }
+
+    // add start text(this text is not returned)
+    if (start == 1) {
+      saved_texts[corrid].push_back("start");
+      continue;
+    }
+    // end text
+    if (end == 1) {
+      // concat texts of saved_texts vector
+      std::string output_text;
+      saved_texts[corrid].erase(saved_texts[corrid].begin());
+      for (auto text : saved_texts[corrid]) {
+        // parse text by mecab
+        auto parsed_text_vector = ParseText(text);
+
+        // add text
+        for (auto text : parsed_text_vector) {
+          output_text.append(text + "|");
+        }
+      }
+
+      // reset the text datas of corrid
+      saved_texts[corrid].clear();
+
+      // return the output text
+      return OutputText(output_fn, payloads, output_text);
+    }
+    // if "start" text is already added, text will be added.
+    if (saved_texts[corrid].size() > 0 && saved_texts[corrid].front() == "start") {
+      const char* input_name = payload.input_names[0];
+      std::string input_text;
+      err = GetInputText(
+          input_fn, payload.input_context, input_name, corrid, input_text
+      );
+      if (err != ErrorCodes::Success) {
+        payload.error_code = err;
+        continue;
+      }
+      saved_texts[corrid].push_back(input_text);
+    }
+  }
+
+  return ErrorCodes::Success;
+}
+
+std::vector<std::string> 
+Context::ParseText(std::string text)
+{
+  auto parsed_text = mecab_model->parse(text.c_str());
+  return Split(parsed_text, ' ');
+}
+
+std::vector<std::string>
+Context::Split(std::string str, char del)
+{
+    uint first = 0;
+    uint last = str.find_first_of(del);
+ 
+    std::vector<std::string> result;
+ 
+    while (first < str.size()) {
+        std::string subStr(str, first, last - first);
+ 
+        result.push_back(subStr);
+ 
+        first = last + 1;
+        last = str.find_first_of(del, first);
+ 
+        if (last == std::string::npos) {
+            last = str.size();
+        }
+    }
+ 
+    return result;
 }
 
 int
@@ -251,8 +346,8 @@ Context::OutputText(
 }
 
 int
-Context::SaveInputText(
-    CustomGetNextInputFn_t input_fn, void* input_context, const char* input_name, uint64_t corrid)
+Context::GetInputText(
+    CustomGetNextInputFn_t input_fn, void* input_context, const char* input_name, uint64_t corrid, std::string& input_text)
 {
   const void* content;
   uint64_t content_byte_size = -1;
@@ -276,7 +371,7 @@ Context::SaveInputText(
       (uint32_t*)content, 
       (uint32_t*)content + (content_byte_size/sizeof(uint32_t))
   );
-  saved_texts[corrid].push_back(value);
+  input_text.append(value);
 
   return ErrorCodes::Success;
 }
