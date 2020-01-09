@@ -23,3 +23,4 @@ cd mecab-ipadic-2.7.0-20070801
 ./configure --with-charset=utf8
 ldconfig
 make
+make install
