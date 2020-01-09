@@ -195,8 +195,8 @@ Context::ParseText(std::string text)
 std::vector<std::string>
 Context::Split(std::string str, char del)
 {
-    uint first = 0;
-    uint last = str.find_first_of(del);
+    size_t first = 0;
+    size_t last = str.find_first_of(del);
  
     std::vector<std::string> result;
  
