@@ -25,6 +25,7 @@ target_link_libraries(
   mecab_model
   PRIVATE custombackend
 )
+# TODO : get library path from "mecab-config" command
 target_link_libraries(
   mecab_model
   PRIVATE "-L/usr/local/lib -lmecab -lstdc++"
