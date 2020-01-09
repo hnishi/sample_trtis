@@ -182,7 +182,7 @@ Context::Execute(
     }
   }
 
-  return ErrorCodes::Success;
+  return OutputText(output_fn, payloads, "");
 }
 
 std::vector<std::string> 

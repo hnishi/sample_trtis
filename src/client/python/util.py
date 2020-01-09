@@ -11,6 +11,17 @@ class ContextParameter:
         self.model_version = -1
 
 
+def get_input():
+    text_list = []
+    while True:
+        text = input("please enter text('q' is exit code) : ")
+        if text == "q":
+            break
+        else:
+            text_list.append(text)
+    return text_list
+
+
 def check_health_status(url, model_name, protocol, http_headers, verbose):
     print("Health for model {}".format(model_name))
 

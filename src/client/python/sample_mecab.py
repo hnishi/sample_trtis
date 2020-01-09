@@ -5,7 +5,7 @@ from util import *
 
 def main():
     # setup environment
-    ctx_param = ContextParameter(model_name="sample_sequence")
+    ctx_param = ContextParameter(model_name="mecab_model")
     ctx_param.server_url = "localhost:8000"
     ctx_param.http_headers = None
     ctx_param.verbose = True
@@ -65,6 +65,6 @@ def send_request(ctx, corr_id, text, batch_size=1, start_of_sequence=False, end_
 
 
 if __name__ == "__main__":
-    print("start sample_sequence_client script")
+    print("start sample_instance_client script")
     main()
-    print("end sample_sequence_client script")
+    print("end sample_instance_client script")
